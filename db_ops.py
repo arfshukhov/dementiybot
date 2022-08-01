@@ -1,5 +1,7 @@
 from peewee import *
 
+import os
+
 db = SqliteDatabase('binds.db')
 
 
@@ -33,9 +35,39 @@ async def get_binds(chat_id):
     return answers
 
 
-def remove_binds(chat_id, phrase):
+def remove_binds(id, phras):
     try:
-        rem_binds = Binds.delete().where(Binds.chat_id == chat_id, Binds.phrase == phrase)
-        return "Бинд успешно удален"
+        binds = []
+        for bind in Binds.select().where(Binds.phrase == phras, Binds.chat_id == id):
+            binds.append([bind.type, bind.answer])
+            print(binds)
+        for bind_ in binds:
+            path = os.getcwd()
+            match bind_[0]:
+                case "text":
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case "voice":
+                    path += r"\\audio\\"+bind_[1]
+                    os.remove(path)
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case "video":
+                    path += r"\\video\\"+bind_[1]
+                    os.remove(path)
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case "animation":
+                    path += r"\\animation\\" + bind_[1]
+                    os.remove(path)
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case "photo":
+                    path += r"\\photo\\"
+                    os.remove(path)
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case "sticker":
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                case _:
+                    pass
+
+            return "Бинд успешно удален"
     except:
-        return "Что-то пошло не так. Попробуйте снова или отправьте баг-репорт"
+
+        return "Что-то пошло не так.\nПопробуйте снова или отправьте баг-репорт"

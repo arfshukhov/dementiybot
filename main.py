@@ -26,11 +26,25 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
 
-#async def handle_file(file: File, file_name: str, path: str):
-    #Path(f"{path}").mkdir(parents=True, exist_ok=True)
+async def switch_types(end_path: str, message, phrase, type: str, expansion: str, limit: int, limit_text: str):
+    path = os.getcwd() + end_path
+    file = await message.reply_to_message.animation.get_file()
+    file_name = "".join([str(message.chat.id), "_", f"{type}", "_", str(phrase), expansion])
 
+    new_bind = add_new_bind(
+        chat_id=message.chat.id,
+        type=type,
+        phrase=phrase,
+        answer=file_name)
 
+    await bot.download_file(file_path=file.file_path, destination=f"{path}{file_name}")
 
+    if os.stat(f"{path}{file_name}").st_size > limit:  # 5_242_880
+        os.remove(f"{path}{file_name}")
+        await message.reply(f"Файл слишком большой (макс. для {limit_text})")
+
+    elif os.stat(f"{path}{file_name}").st_size <= limit:
+        await message.reply(new_bind)
 
 
 @dp.message_handler(commands=['help_eugen'])
@@ -39,14 +53,14 @@ async def send_welcome(message: types.Message):
     This handler will be called when user sends `/start` or `/help` command
     """
     await message.reply("Привет, я админ-бот Prinz Eugen от @Harfile" "\n"
-                        "Ща допишу, здесь все доступные команды будут...")
+                        "")
 
 
 @dp.message_handler(commands=['echo'])
 async def echooo(message):
-    msg = str(message.text).removeprefix('/echo')
+    msg = str(message.reply_to_message.text)
     print("\n\n\n", msg, "\n\n\n")
-    await message.reply(f"Петух по имени {message.from_user.mention} кукарекнул: {msg}")
+    await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
 
 
 @dp.message_handler(commands=["dice"])
@@ -117,79 +131,61 @@ async def set_bind(message):
                     await message.reply(new_bind)
 
                 case "voice":
-                    path = os.getcwd()+r"\\audio\\"
-                    voice = await message.reply_to_message.voice.get_file()
-                    file_name = "".join([str(message.chat.id), "_", "audio", "_", str(msg), ".ogg"])
+                    await switch_types(end_path=r"\\animation\\",
+                                       message=message,
+                                       phrase=msg,
+                                       type="animation",
+                                       expansion=".gif",
+                                       limit=7_340_032,
+                                       limit_text="GIF 7 МБ")
 
+                case "animation":  # 15_728_640
+                    await switch_types(end_path=r"\\animation\\",
+                                       message=message,
+                                       phrase=msg,
+                                       type="animation",
+                                       expansion=".gif",
+                                       limit=7_340_032,
+                                       limit_text="GIF 7 МБ")
+
+                case "photo":
+                    await switch_types(end_path=r"\\photo\\",
+                                       message=message,
+                                       phrase=msg,
+                                       type="photo",
+                                       expansion=".jpg",
+                                       limit=5_242_880,
+                                       limit_text="фото 5 МБ")
+                case "sticker":
                     new_bind = add_new_bind(
                         chat_id=message.chat.id,
-                        type="voice",
+                        type="sticker",
                         phrase=msg,
-                        answer=file_name)
-
-                    await bot.download_file(file_path=voice.file_path, destination=f"{path}{file_name}")
+                        answer=message.reply_to_message.sticker.file_id)
                     await message.reply(new_bind)
-
-                case "video":
-                    path = os.getcwd() + r"\\video\\"
-                    video = await message.reply_to_message.video.get_file()
-                    file_name = "".join([str(message.chat.id), "_", "video", "_", str(msg), ".mp4"])
-
-                    new_bind = add_new_bind(
-                        chat_id=message.chat.id,
-                        type="video",
-                        phrase=msg,
-                        answer=file_name)
-
-                    await bot.download_file(file_path=video.file_path, destination=f"{path}{file_name}")
-
-                    if os.stat(f"{path}{file_name}").st_size > 15_728_640:#52_428_000
-                        os.remove(f"{path}{file_name}")
-                        await message.reply("Файл слишком большой (пока что, макс. для видео: 15 МБ).\n" 
-                                            "Вы можете попробовать сжать файл при отправке.")
-
-                    elif os.stat(f"{path}{file_name}").st_size <= 15_728_640:#52_428_000
-                        await message.reply(new_bind)
-
-                case "animation":
-                    path = os.getcwd() + r"\\animation\\"
-                    animation = await message.reply_to_message.animation.get_file()
-                    file_name = "".join([str(message.chat.id), "_", "animation", "_", str(msg), ".gif"])
-
-                    await message.reply(os.path.getsize(animation))
-
-                    new_bind = add_new_bind(
-                        chat_id=message.chat.id,
-                        type="animation",
-                        phrase=msg,
-                        answer=file_name)
-
-                    await bot.download_file(file_path=animation.file_path, destination=f"{path}{file_name}")
-
-                    if os.stat(f"{path}{file_name}").st_size > 7_340_032:
-                        os.remove(f"{path}{file_name}")
-                        await message.reply("Файл слишком большой (макс. для GIF 7 МБ)")
-
-                    elif os.stat(f"{path}{file_name}").st_size <= 7_340_032:
-                        await message.reply(new_bind)
-
                 case _:
                     await message.reply("Биндов такого типа пока не завезли)")
+
         else:
             await message.reply("Что биндить-то?")
     else:
         await message.reply('Ваш бинд имеет неверный вид.\n'
-        'Бинд должен иметь следующий вид: /bind ("ваша фраза")\n'
-        'т.е. аргументы для команды передаются в скобках и ковычках, с отступом в один пробел от самоый команды.')
+                            'Бинд должен иметь следующий вид: /bind ("ваша фраза")\n'
+                            'т.е. аргументы для команды передаются в скобках и ковычках, с отступом в один пробел от самоый команды.')
 
 
 @dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
-    rem_bind = remove_binds(
-        chat_id=message.chat.id,
-        phrase=message.text
-    )
-    pass
+    if message.text[8] == "(" and message.text[-1] == ")":
+        msg = message.text[10:-2:1]
+        rem_bind = remove_binds(
+            id=message.chat.id,
+            phras=msg)
+        await message.reply(rem_bind)
+    else:
+        await message.reply('Ваша команда имеет неверный вид.\n'
+                            'Unbind должен иметь следующий вид: /unbind ("ваша фраза")\n'
+                            'т.е. аргументы для команды передаются в скобках и ковычках, с отступом в один пробел от самоый команды.')
 
 
 @dp.message_handler(content_types=['text'])
@@ -204,21 +200,26 @@ async def filter_messages(message: types.Message):
 
                 case "voice":
                     path = os.getcwd() + r"\\audio\\"
-                    file = open(f"{path}{str(elem[2])}", "rb")
-                    await message.reply_voice(file)
-                    file.close()
+                    with open(f"{path}{str(elem[2])}", "rb") as file:
+                        await message.reply_voice(file)
 
                 case "video":
                     path = os.getcwd() + r"\\video\\"
-                    file = open(f"{path}{str(elem[2])}", "rb")
-                    await message.reply_video(file)
-                    file.close()
+                    with open(f"{path}{str(elem[2])}", "rb") as file:
+                        await message.reply_video(file)
 
                 case "animation":
                     path = os.getcwd() + r"\\animation\\"
-                    file = open(f"{path}{str(elem[2])}", "rb")
-                    await message.reply_animation(file)
-                    file.close()
+                    with open(f"{path}{str(elem[2])}", "rb") as file:
+                        await message.reply_animation(file)
+
+                case "photo":
+                    path = os.getcwd() + r"\\photo\\"
+                    with open(f"{path}{str(elem[2])}", "rb") as file:
+                        await message.reply_animation(file)
+
+                case "sticker":
+                    await message.reply_sticker(str(elem[2]))
 
                 case _:
                     await bot.send_message(message.chat.id, "error")
