@@ -1,0 +1,17 @@
+aiogram
+aiohttp
+aiosignal
+asgiref
+async-timeout
+attrs
+Babel
+certifi
+charset-normalizer
+emoji
+frozenlist
+idna
+multidict
+peewee
+pip
+setuptools
+sqlparse

@@ -16,9 +16,11 @@ from aiogram.types import ContentType, Message, File
 
 from db_ops import *
 
-API_TOKEN = '5558759642:AAEBYYZzgJv4GPT8YMzf6qgAh14klSKowtY'
+API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
 
+#'5558759642:AAEBYYZzgJv4GPT8YMzf6qgAh14klSKowtY'
 # Configure logging
+
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize bot and dispatcher
@@ -47,13 +49,17 @@ async def switch_types(end_path: str, message, phrase, type: str, expansion: str
         await message.reply(new_bind)
 
 
-@dp.message_handler(commands=['help_eugen'])
+@dp.message_handler(commands=['help_demy'])
 async def send_welcome(message: types.Message):
-    """
-    This handler will be called when user sends `/start` or `/help` command
-    """
-    await message.reply("Привет, я админ-бот Prinz Eugen от @Harfile" "\n"
-                        "")
+    await message.reply("Привет, я админ-бот Дементий от @Harfile" "\n"
+                        '/bind ("ваша фраза") - можно добавить бинд, который будет срабатывать на определенное слово'
+                        'или фразу. Чтобы воспользоваться функцией, нужно после команды, отстпив пробел, написать в'
+                        'скобках и ковычках фразу-триггер. Триггер можно снять командой /unbind аналогичным образом.'
+                        'Сейчас доступны следующие типы триггеров: текст, видео, голосовые сообщения, видео, фото, gif'
+                        'и стикеры.\n'
+                        '/echo - отправитель сообщения закукарекает.\n'
+                        '/dice - бросает кость, через пробел можно указать число бросков, но не более 10.\n'
+                        '/ban и /unban - в ответ на сообщение банит пользователя')
 
 
 @dp.message_handler(commands=['echo'])

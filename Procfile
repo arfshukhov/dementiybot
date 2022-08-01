@@ -1,1 +1,1 @@
-web: gunicorn runp-heroku:main
+worker: python main.py
