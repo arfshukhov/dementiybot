@@ -1,53 +1,4 @@
-import logging
-
-import json
-
-from pathlib import Path
-
-import os
-
-import subprocess
-
-import emoji
-
-from aiogram import Bot, Dispatcher, executor, types
-
-from aiogram.types import ContentType, Message, File
-
-from db_ops import *
-
-API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
-
-#'5558759642:AAEBYYZzgJv4GPT8YMzf6qgAh14klSKowtY'
-# Configure logging
-
-logging.basicConfig(level=logging.DEBUG)
-
-# Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
-
-
-async def switch_types(end_path: str, message, phrase, type: str, expansion: str, limit: int, limit_text: str):
-    path = os.getcwd() + end_path
-    file = await message.reply_to_message.animation.get_file()
-    file_name = "".join([str(message.chat.id), "_", f"{type}", "_", str(phrase), expansion])
-
-    new_bind = add_new_bind(
-        chat_id=message.chat.id,
-        type=type,
-        phrase=phrase,
-        answer=file_name)
-
-    await bot.download_file(file_path=file.file_path, destination=f"{path}{file_name}")
-
-    if os.stat(f"{path}{file_name}").st_size > limit:  # 5_242_880
-        os.remove(f"{path}{file_name}")
-        await message.reply(f"Файл слишком большой (макс. для {limit_text})")
-
-    elif os.stat(f"{path}{file_name}").st_size <= limit:
-        await message.reply(new_bind)
-
+from support_methods import *
 
 @dp.message_handler(commands=['help_demy'])
 async def send_welcome(message: types.Message):
@@ -63,10 +14,16 @@ async def send_welcome(message: types.Message):
 
 
 @dp.message_handler(commands=['echo'])
-async def echooo(message):
+async def echo(message):
     msg = str(message.reply_to_message.text)
     print("\n\n\n", msg, "\n\n\n")
     await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
+
+
+@dp.message_handler(commands=["mobilize"])
+async def mobilize(message):
+    with open("templates/mobilize.jpg", 'rb') as pht:
+        await message.reply_photo(pht)
 
 
 @dp.message_handler(commands=["dice"])
@@ -136,32 +93,29 @@ async def set_bind(message):
                         answer=message.reply_to_message.text)
                     await message.reply(new_bind)
 
-                case "voice":
-                    await switch_types(end_path=r"\\animation\\",
-                                       message=message,
+                case "video":
+                    await switch_types(message=message,
                                        phrase=msg,
-                                       type="animation",
-                                       expansion=".gif",
-                                       limit=7_340_032,
-                                       limit_text="GIF 7 МБ")
+                                       file_id=message.reply_to_message.video.file_id,
+                                       type="video")
+                case "voice":
+                    await switch_types(message=message,
+                                       phrase=msg,
+                                       file_id=message.reply_to_message.voice.file_id,
+                                       type="animation")
 
                 case "animation":  # 15_728_640
-                    await switch_types(end_path=r"\\animation\\",
-                                       message=message,
+                    await switch_types(message=message,
                                        phrase=msg,
-                                       type="animation",
-                                       expansion=".gif",
-                                       limit=7_340_032,
-                                       limit_text="GIF 7 МБ")
+                                       file_id=message.reply_to_message.animation.file_id,
+                                       type="animation")
 
                 case "photo":
-                    await switch_types(end_path=r"\\photo\\",
+                    await switch_types(
                                        message=message,
                                        phrase=msg,
-                                       type="photo",
-                                       expansion=".jpg",
-                                       limit=5_242_880,
-                                       limit_text="фото 5 МБ")
+                                       file_id=message.reply_to_message.photo[-1].file_id,
+                                       type="photo")
                 case "sticker":
                     new_bind = add_new_bind(
                         chat_id=message.chat.id,
@@ -186,7 +140,7 @@ async def remove_bind(message):
         msg = message.text[10:-2:1]
         rem_bind = remove_binds(
             id=message.chat.id,
-            phras=msg)
+            phrase=msg)
         await message.reply(rem_bind)
     else:
         await message.reply('Ваша команда имеет неверный вид.\n'
@@ -205,25 +159,16 @@ async def filter_messages(message: types.Message):
                     await message.reply(str(elem[2]))
 
                 case "voice":
-                    path = os.getcwd() + r"\\audio\\"
-                    with open(f"{path}{str(elem[2])}", "rb") as file:
-                        await message.reply_voice(file)
+                    await message.reply_voice(voice=str(elem[2]))
 
                 case "video":
-                    path = os.getcwd() + r"\\video\\"
-                    with open(f"{path}{str(elem[2])}", "rb") as file:
-                        await message.reply_video(file)
+                    await message.reply_video(video=str(elem[2]))
 
                 case "animation":
-                    path = os.getcwd() + r"\\animation\\"
-                    with open(f"{path}{str(elem[2])}", "rb") as file:
-                        await message.reply_animation(file)
+                    await message.reply_animation(animation=str(elem[2]))
 
                 case "photo":
-                    path = os.getcwd() + r"\\photo\\"
-                    with open(f"{path}{str(elem[2])}", "rb") as file:
-                        await message.reply_animation(file)
-
+                    await message.reply_photo(photo=str(elem[2]))
                 case "sticker":
                     await message.reply_sticker(str(elem[2]))
 

@@ -29,41 +29,30 @@ def add_new_bind(chat_id, type, phrase, answer):
 async def get_binds(chat_id):
     answers = []
     for binds in Binds.select().where(Binds.chat_id == chat_id):
-        print(binds)
         answers.append([binds.type, binds.phrase, binds.answer])
-        print(answers)
     return answers
 
 
-def remove_binds(id, phras):
+def remove_binds(id, phrase):
     try:
         binds = []
         for bind in Binds.select().where(Binds.phrase == phras, Binds.chat_id == id):
             binds.append([bind.type, bind.answer])
-            print(binds)
         for bind_ in binds:
             path = os.getcwd()
             match bind_[0]:
                 case "text":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "voice":
-                    path += r"\\audio\\"+bind_[1]
-                    os.remove(path)
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "video":
-                    path += r"\\video\\"+bind_[1]
-                    os.remove(path)
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "animation":
-                    path += r"\\animation\\" + bind_[1]
-                    os.remove(path)
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "photo":
-                    path += r"\\photo\\"
-                    os.remove(path)
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "sticker":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phras).execute()
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case _:
                     pass
 
