@@ -17,7 +17,6 @@ peewee
 Pillow
 pip
 PySocks
-pytz
 pywin32
 requests
 setuptools
