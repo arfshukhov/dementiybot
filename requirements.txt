@@ -19,7 +19,6 @@ requests
 setuptools
 sqlparse
 tzdata
-urllib3
 vboxapi
 xmltodict
 yarl
