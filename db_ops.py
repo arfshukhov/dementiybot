@@ -36,7 +36,7 @@ async def get_binds(chat_id):
 def remove_binds(id, phrase):
     try:
         binds = []
-        for bind in Binds.select().where(Binds.phrase == phras, Binds.chat_id == id):
+        for bind in Binds.select().where(Binds.phrase == phrase, Binds.chat_id == id):
             binds.append([bind.type, bind.answer])
         for bind_ in binds:
             path = os.getcwd()

@@ -1,6 +1,17 @@
 from support_methods import *
 
-@dp.message_handler(commands=['help_demy'])
+import logging
+import json
+from pathlib import Path
+import os
+import subprocess
+import emoji
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import ContentType, Message, File
+from db_ops import *
+
+
+@dp.message_handler(commands=['help_demy', "help"])
 async def send_welcome(message: types.Message):
     await message.reply("Привет, я админ-бот Дементий от @Harfile" "\n"
                         '/bind ("ваша фраза") - можно добавить бинд, который будет срабатывать на определенное слово'
@@ -10,14 +21,15 @@ async def send_welcome(message: types.Message):
                         'и стикеры.\n'
                         '/echo - отправитель сообщения закукарекает.\n'
                         '/dice - бросает кость, через пробел можно указать число бросков, но не более 10.\n'
+                        '/wiki_get ("название статьи") команда возвращает статью на Википедии'
                         '/ban и /unban - в ответ на сообщение банит пользователя')
 
 
 @dp.message_handler(commands=['echo'])
 async def echo(message):
-    msg = str(message.reply_to_message.text)
-    print("\n\n\n", msg, "\n\n\n")
-    await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
+    if message.reply_to_message:
+        msg = str(message.reply_to_message.text)
+        await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
 
 
 @dp.message_handler(commands=["mobilize"])
@@ -25,6 +37,14 @@ async def mobilize(message):
     with open("templates/mobilize.jpg", 'rb') as pht:
         await message.reply_photo(pht)
 
+
+@dp.message_handler(commands=["wiki_get"])
+async def wiki_get(message):
+    if message.text[10] == "(" and message.text[-1] == ")":
+        request = message.text[12:-2:1]
+        await message.reply(get_wiki_note(request=request))
+    else:
+        await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
 
 @dp.message_handler(commands=["dice"])
 async def dice(message):
@@ -47,34 +67,33 @@ async def new_members_handler(message: Message):
 
 @dp.message_handler(commands=["ban"], is_chat_admin=True)
 async def ban(message):
-    member = str(message.text).removeprefix('/ban')
+    #member = str(message.text).removeprefix('/ban')
     admin_rights = await message.chat.get_member(message.from_user.id)
-    print(admin_rights, " \n", message.reply_to_message.from_user.id)
     dump = json.dumps(dict(admin_rights))
 
-    if '"can_restrict_members": true' in dump:
+    if '"can_restrict_members": true' in dump and message.reply_to_message:
         try:
             await bot.kick_chat_member(chat_id=message.chat.id, user_id=message.reply_to_message.from_user.id)  #
             await bot.send_message(message.chat.id,
                                    f"Пользователь {message.reply_to_message.from_user.mention} забанен")
         except:
-            await message.reply(f"Я не могу его забанить {message.reply_to_message.from_user.mention}")
+            await message.reply(f"Я не могу забанить {message.reply_to_message.from_user.mention}")
     else:
-        await bot.send_message(message.chat.id, "хуй соси, говно написал")
+        await bot.send_message(message.chat.id, "У вас недостаточно прав, чтобы забанить пользователя")
 
 
 @dp.message_handler(commands=["unban"], is_chat_admin=True)
 async def unban(message):
     admin_rights = await message.chat.get_member(message.from_user.id)
     dump = json.dumps(dict(admin_rights))
-    if '"can_restrict_members": true' in dump:
+    if '"can_restrict_members": true' in dump and message.reply_to_message:
         try:
             await message.bot.unban_chat_member(message.chat.id, message.reply_to_message.from_user.id)
             await bot.send_message(message.chat.id, "Пользователь разбанен")
         except:
             await bot.send_message(message.chat.id, "Что-то пошло не так, разбаньте пользователя вручную")
     else:
-        await bot.send_message(message.chat.id, " ")
+        await bot.send_message(message.chat.id, "У вас недостаточно прав")
 
 
 @dp.message_handler(commands=["bind"])
@@ -152,7 +171,7 @@ async def remove_bind(message):
 async def filter_messages(message: types.Message):
     bind = await get_binds(chat_id=int(message.chat.id))
     for elem in bind:
-        if elem[1] in message.text.lower():
+        if elem[1].lower() in message.text.lower():
             match elem[0]:
 
                 case "text":
@@ -173,7 +192,7 @@ async def filter_messages(message: types.Message):
                     await message.reply_sticker(str(elem[2]))
 
                 case _:
-                    await bot.send_message(message.chat.id, "error")
+                    await bot.send_message(message.chat.id, "Хотел я отрпавить бинд, но что-то пошло не так...")
 
 
 if __name__ == '__main__':

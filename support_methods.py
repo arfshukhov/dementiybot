@@ -4,9 +4,13 @@ from pathlib import Path
 import os
 import subprocess
 import emoji
+import wikipedia
+
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType, Message, File
+
 from db_ops import *
+
 
 
 API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
@@ -17,6 +21,16 @@ API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
+
+def get_wiki_note(request: str):
+
+    try:
+        wikipedia.set_lang("ru")
+        notes = wikipedia.search(request, results=1)
+        pg = wikipedia.page(*notes)
+        return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
+    except Exception as e:
+        return "Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт."
 
 
 async def switch_types(message, file_id, type: str, phrase):
