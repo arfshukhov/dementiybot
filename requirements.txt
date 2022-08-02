@@ -16,7 +16,6 @@ multidict
 peewee
 Pillow
 pip
-PySocks
 pywin32
 requests
 setuptools
