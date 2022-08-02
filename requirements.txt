@@ -14,7 +14,6 @@ idna
 keyboard
 multidict
 peewee
-Pillow
 pip
 pywin32
 requests
