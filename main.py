@@ -35,7 +35,7 @@ async def echo(message):
 @dp.message_handler(commands=["mobilize"])
 async def mobilize(message):
     with open("templates/mobilize.jpg", 'rb') as pht:
-        await message.reply_photo(pht)
+        await message.reply_to_message.reply_photo(pht)
 
 
 @dp.message_handler(commands=["wiki_get"])
