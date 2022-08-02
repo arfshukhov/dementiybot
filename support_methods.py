@@ -26,8 +26,8 @@ def get_wiki_note(request: str):
 
     try:
         wikipedia.set_lang("ru")
-        notes = wikipedia.search(request, results=1)
-        pg = wikipedia.page(*notes)
+        notes = wikipedia.search(request)
+        pg = wikipedia.page(notes[0])
         return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
     except Exception as e:
         return "Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт."
