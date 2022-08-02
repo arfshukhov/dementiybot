@@ -15,7 +15,6 @@ keyboard
 multidict
 peewee
 pip
-pywin32
 requests
 setuptools
 sqlparse
