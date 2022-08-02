@@ -26,12 +26,12 @@ def get_wiki_note(request: str):
 
     try:
         wikipedia.set_lang("ru")
-        notes = wikipedia.search(request)
-        print(type(notes))
-        pg = wikipedia.page(str((json.load(notes))[0]))
+        #notes = wikipedia.search(request)
+ 
+        pg = wikipedia.page(request)
         return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
     except Exception as e:
-        return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт.{e}"
+        return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт."
 
 
 async def switch_types(message, file_id, type: str, phrase):
