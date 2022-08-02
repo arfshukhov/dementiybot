@@ -28,7 +28,7 @@ def get_wiki_note(request: str):
         wikipedia.set_lang("ru")
         notes = wikipedia.search(request)
         print(type(notes))
-        pg = wikipedia.page(json.loads(notes)[0])
+        pg = wikipedia.page(str((json.load(notes))[0]))
         return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
     except Exception as e:
         return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт.{e}"
