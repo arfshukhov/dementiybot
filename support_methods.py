@@ -27,7 +27,7 @@ def get_wiki_note(request: str):
     try:
         wikipedia.set_lang("ru")
         notes = wikipedia.search(request)
-        await message.reply(type(notes))
+        #await message.reply(type(notes))
         pg = wikipedia.page(loads(notes)[0])
         return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
     except Exception as e:
