@@ -18,7 +18,5 @@ pip
 requests
 setuptools
 sqlparse
-tzdata
-vboxapi
 xmltodict
 yarl
