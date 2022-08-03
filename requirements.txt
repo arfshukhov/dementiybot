@@ -8,4 +8,3 @@ Babel
 emoji
 peewee
 pip
-vboxapi
