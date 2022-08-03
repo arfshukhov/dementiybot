@@ -34,9 +34,19 @@ async def echo(message):
 
 @dp.message_handler(commands=["mobilize"])
 async def mobilize(message):
+    print(message.from_user.id)
     with open("templates/mobilize.jpg", 'rb') as pht:
         await message.reply_to_message.reply_photo(pht)
 
+
+@dp.message_handler(commands=["report"])
+async def send_report(message):
+    report = "\n".join([message.from_user.mention, str(message.text).removeprefix("/report")])
+    if not report.isspace():
+        await bot.send_message(admin, report)
+        await message.reply("Баг-репорт успешно отправлен. Разработчик ознакомится с информацией.")
+    else:
+        await message.reply("Мне нечего передать разработчику.")
 
 @dp.message_handler(commands=["wiki_get"])
 async def wiki_get(message):

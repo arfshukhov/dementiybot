@@ -15,6 +15,8 @@ from db_ops import *
 
 API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
 
+admin = 1053410847
+
 
 # logging.basicConfig(level=logging.DEBUG)
 
@@ -22,14 +24,14 @@ API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
-def get_wiki_note(request: str):
 
+def get_wiki_note(request: str):
     try:
         wikipedia.set_lang("ru")
-        #notes = wikipedia.search(request)
- 
+        # notes = wikipedia.search(request)
+
         pg = wikipedia.page(request)
-        return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000]+"..."])
+        return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000] + "..."])
     except Exception as e:
         return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт."
 
