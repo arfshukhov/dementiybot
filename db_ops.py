@@ -1,8 +1,9 @@
 from peewee import *
-
+from dataset import *
 import os
 
-db = SqliteDatabase('binds.db')
+
+db = PostgresqlDatabase(database, host=host, port=port, user=user, password=password)
 
 
 class Binds(Model):
@@ -14,8 +15,9 @@ class Binds(Model):
     class Meta:
         database = db
 
-with db:
-    db.create_tables([Binds])
+
+db.connect()
+db.create_tables([Binds])
 
 
 def add_new_bind(chat_id, type, phrase, answer):

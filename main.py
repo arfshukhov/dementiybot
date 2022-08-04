@@ -1,5 +1,4 @@
-from support_methods import *
-
+from dataset import API_TOKEN, admin
 import logging
 import json
 from pathlib import Path
@@ -9,6 +8,12 @@ import emoji
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType, Message, File
 from db_ops import *
+
+from support_methods import *
+
+
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=['help_demy', "help"])
@@ -51,6 +56,7 @@ async def send_report(message):
         await message.reply("Баг-репорт успешно отправлен. Разработчик ознакомится с информацией.")
     else:
         await message.reply("Мне нечего передать разработчику.")
+
 
 @dp.message_handler(commands=["wiki_get"])
 async def wiki_get(message):

@@ -6,6 +6,8 @@ import subprocess
 import emoji
 import wikipedia
 
+
+
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType, Message, File
 
@@ -13,16 +15,7 @@ from db_ops import *
 
 
 
-API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
-
-admin = 1053410847
-
-
 # logging.basicConfig(level=logging.DEBUG)
-
-# Initialize bot and dispatcher
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
 
 
 def get_wiki_note(request: str):
