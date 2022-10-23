@@ -3,7 +3,7 @@ from dataset import *
 import os
 
 
-db = PostgresqlDatabase(database, host=host, port=port, user=user, password=password)
+db = SqliteDatabase("data.db")
 
 
 class Binds(Model):
