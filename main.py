@@ -29,7 +29,7 @@ async def send_welcome(message: types.Message):
                         '/dice - бросает кость, через пробел можно указать число бросков, но не более 10.\n'
                         '/wiki_get ("название статьи") команда возвращает статью на Википедии.\n'
                         '/ban и /unban - в ответ на сообщение банит пользователя\n'
-                        '/mobilize - мобилизует пользователя'
+                        '/mobilize - мобилизует пользователя\n'
                         '/report - отправить репорт разработчику, будь то жалоба или предложение. после слова /report '
                         'оставьте текст')
 
@@ -50,10 +50,11 @@ async def get_db(message):
 
 @dp.message_handler(commands=["mobilize"])
 async def mobilize(message):
-    print(message.from_user.id)
-    with open("templates/mobilize.jpg", 'rb') as pht:
-        await message.reply_to_message.reply_photo(pht)
-
+    if message.reply_to_message:
+        with open("templates/mobilize.jpg", 'rb') as pht:
+            await message.reply_to_message.reply_photo(pht)
+    else:
+        pass
 
 @dp.message_handler(commands=["report"])
 async def send_report(message):
@@ -67,12 +68,16 @@ async def send_report(message):
 
 @dp.message_handler(commands=["wiki_get"])
 async def wiki_get(message):
-    if message.text[10] == "(" and message.text[-1] == ")":
-        request = message.text[12:-2:1]
-        await message.reply(get_wiki_note(request=request))
-    else:
+    try:
+        if message.text[10] == "(" and message.text[-1] == ")":
+            request = message.text[12:-2:1]
+            await message.reply(get_wiki_note(request=request))
+        else:
+            await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
+    except:
         await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
 
+    
 @dp.message_handler(commands=["dice"])
 async def dice(message):
     times = str(message.text).removeprefix('/dice ')
