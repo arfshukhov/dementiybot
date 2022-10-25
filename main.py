@@ -77,7 +77,7 @@ async def wiki_get(message):
     except:
         await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
 
-    
+
 @dp.message_handler(commands=["dice"])
 async def dice(message):
     times = str(message.text).removeprefix('/dice ')
