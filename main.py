@@ -1,4 +1,4 @@
-from dataset import API_TOKEN, admin
+from dataset import API_TOKEN, developer
 import logging
 import json
 from pathlib import Path
@@ -40,6 +40,13 @@ async def echo(message):
         msg = str(message.reply_to_message.text)
         await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
 
+@dp.message_handler(commands=["get_db"])
+async def get_db(message):
+    if message.from_user.id == developer:
+        await bot.send_document(message.chat.id, open("data.db", "rb"))
+    else:
+        message.reply_to_message("У вас нет доступа к этой функции")
+
 
 @dp.message_handler(commands=["mobilize"])
 async def mobilize(message):
@@ -52,7 +59,7 @@ async def mobilize(message):
 async def send_report(message):
     report = "\n".join([message.from_user.mention, str(message.text).removeprefix("/report")])
     if not report.isspace():
-        await bot.send_message(admin, report)
+        await bot.send_message(developer, report)
         await message.reply("Баг-репорт успешно отправлен. Разработчик ознакомится с информацией.")
     else:
         await message.reply("Мне нечего передать разработчику.")
@@ -217,3 +224,4 @@ async def filter_messages(message: types.Message):
 
 if __name__ == '__main__':
     executor.start_polling(dp)
+

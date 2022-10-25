@@ -1,6 +1,6 @@
 API_TOKEN = '5531261630:AAEhBlU9fwMZeNf47nYZbUjb95MeVl3zYaE'
 
-admin = 1053410847
+developer = 1053410847
 
 database = "dde49h0d083bkt"
 

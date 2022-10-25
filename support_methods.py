@@ -1,9 +1,4 @@
 import logging
-import json
-from pathlib import Path
-import os
-import subprocess
-import emoji
 import wikipedia
 
 
