@@ -20,11 +20,11 @@ db.create_tables([Binds])
 
 
 def add_new_bind(chat_id, type, phrase, answer):
-    #try:
-    bind = Binds(chat_id=str(chat_id), type=str(type), phrase=str(phrase), answer=str(answer)).save()
-    return "Бинд успешно добавлен!"
-    #except:
-    #    return "Что-то пошло не так. Попробуйте заново или оставьте баг-репорт"
+    try:
+        bind = Binds(chat_id=str(chat_id), type=str(type), phrase=str(phrase), answer=str(answer)).save()
+        return "Бинд успешно добавлен!"
+    except:
+        return "Что-то пошло не так. Попробуйте заново или оставьте баг-репорт"
 
 
 async def get_binds(chat_id):
