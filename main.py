@@ -1,4 +1,4 @@
-from dataset import API_TOKEN, developer
+from dataset import API_TOKEN, developer, database
 import logging
 import json
 from pathlib import Path
@@ -40,12 +40,12 @@ async def echo(message):
         msg = str(message.reply_to_message.text)
         await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
 
-@dp.message_handler(commands=["get_db"])
+'''@dp.message_handler(commands=["get_db"])
 async def get_db(message):
     if message.from_user.id == developer:
-        await bot.send_document(message.chat.id, open("data.db", "rb"))
+        await bot.send_document(message.chat.id, open(f"{database}.db", "rb"))
     else:
-        message.reply_to_message("У вас нет доступа к этой функции")
+        message.reply_to_message("У вас нет доступа к этой функции")'''
 
 
 @dp.message_handler(commands=["mobilize"])
@@ -174,8 +174,18 @@ async def set_bind(message):
                         phrase=msg,
                         answer=message.reply_to_message.sticker.file_id)
                     await message.reply(new_bind)
+
+                case "video_note":
+                    new_bind = add_new_bind(
+                        chat_id=message.chat.id,
+                        type="video_note",
+                        phrase=msg,
+                        answer=message.reply_to_message.video_note.file_id)
+                    await message.reply(new_bind)
+
                 case _:
                     await message.reply("Биндов такого типа пока не завезли)")
+
 
         else:
             await message.reply("Что биндить-то?")
@@ -219,9 +229,13 @@ async def filter_messages(message: types.Message):
                     await message.reply_animation(animation=str(elem[2]))
 
                 case "photo":
+
                     await message.reply_photo(photo=str(elem[2]))
                 case "sticker":
                     await message.reply_sticker(str(elem[2]))
+
+                case "video_note":
+                    await  message.reply_video_note(str(elem[2]))
 
                 case _:
                     await bot.send_message(message.chat.id, "Хотел я отрпавить бинд, но что-то пошло не так...")
