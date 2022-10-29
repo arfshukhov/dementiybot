@@ -45,8 +45,8 @@ def add_new_bind(chat_id, type, phrase, answer):
     try:
         bind = Binds(chat_id=str(chat_id), type=str(type), phrase=str(phrase), answer=str(answer)).save()
         return "Бинд успешно добавлен!"
-    except :
-        return "Что-то пошло не так. Попробуйте заново или оставьте баг-репорт"
+    except Exception as e:
+        return f"Что-то пошло не так. Попробуйте заново или оставьте баг-репорт, вот текст ошибки: \n{e}"
 
 
 async def get_binds(chat_id):
