@@ -77,6 +77,8 @@ def remove_binds(chat_id, phrase):
                     rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case "sticker":
                     rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
+                case "video_note":
+                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case _:
                     pass
 
