@@ -19,15 +19,15 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=['help_demy', "help"])
 async def send_welcome(message: types.Message):
     await message.reply("Привет, я админ-бот Дементий от @Harfile\n"
-                        '/bind ("ваша фраза") - можно добавить бинд, который будет срабатывать на определенное слово'
+                        '/bind ваша фраза - можно добавить бинд, который будет срабатывать на определенное слово'
                         'или фразу. Чтобы воспользоваться функцией, нужно после команды, отстпив пробел, написать в'
                         'скобках и ковычках фразу-триггер. \nТриггер можно снять командой /unbind, команда имеет '
                         'аналогичный с /bind синтаксис.\n' 
-                        'Сейчас доступны следующие типы триггеров: текст, видео, голосовые сообщения, видео, фото, gif'
-                        'и стикеры.\n'
+                        'Сейчас доступны следующие типы триггеров: текст, видео, голосовые сообщения, видео, фото, gif,'
+                        'стикеры и видеозаписи ("кружки").\n'
                         '/echo - отправитель сообщения закукарекает.\n'
                         '/dice - бросает кость, через пробел можно указать число бросков, но не более 10.\n'
-                        '/wiki_get ("название статьи") команда возвращает статью на Википедии.\n'
+                        '/wiki_get название статьи - команда возвращает статью на Википедии.\n'
                         '/ban и /unban - в ответ на сообщение банит пользователя\n'
                         '/mobilize - мобилизует пользователя\n'
                         '/report - отправить репорт разработчику, будь то жалоба или предложение. после слова /report '
@@ -40,12 +40,15 @@ async def echo(message):
         msg = str(message.reply_to_message.text)
         await message.reply(f"Петух по имени {message.reply_to_message.from_user.mention} кукарекнул: {msg}")
 
-'''@dp.message_handler(commands=["get_db"])
+@dp.message_handler(commands=["dev_note"])
 async def get_db(message):
     if message.from_user.id == developer:
-        await bot.send_document(message.chat.id, open(f"{database}.db", "rb"))
+        note = str(message.text).removeprefix("/dev_note ")
+        ids = get_ids()
+        for i in ids:
+            await bot.send_message(i, f"#Дневник_разработки\n#dev_blog\n{note}")
     else:
-        message.reply_to_message("У вас нет доступа к этой функции")'''
+        message.reply_to_message("У вас нет доступа к этой функции")
 
 
 @dp.message_handler(commands=["mobilize"])
@@ -69,13 +72,11 @@ async def send_report(message):
 @dp.message_handler(commands=["wiki_get"])
 async def wiki_get(message):
     try:
-        if message.text[10] == "(" and message.text[-1] == ")":
-            request = message.text[12:-2:1]
-            await message.reply(get_wiki_note(request=request))
-        else:
-            await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
-    except:
-        await message.reply("Ваша команда имеет неверное форматирования. Для просмотра синтаксиса команд /help_demy")
+        request = message.text.removeprefix("/wiki_get ")
+        await message.reply(get_wiki_note(request=request))
+
+    except Exception as e:
+        await message.reply(f"Что-то пошло не так! Вот текст ошибки:\n {e} \n Отправьте ее разработчику с помощью команды /report")
 
 
 @dp.message_handler(commands=["dice"])
@@ -94,6 +95,7 @@ async def dice(message):
 @dp.message_handler(content_types=[ContentType.NEW_CHAT_MEMBERS])
 async def new_members_handler(message: Message):
     new_member = message.new_chat_members[0]
+    add_chat_id(message.chat.id)
     await bot.send_message(message.chat.id, f"Добро пожаловать, {new_member.mention}")
 
 
@@ -130,83 +132,75 @@ async def unban(message):
 
 @dp.message_handler(commands=["bind"])
 async def set_bind(message):
-    if message.text[6] == "(" and message.text[-1] == ")":
-        msg = message.text[8:-2:1]
-        if not msg.isspace():
+    msg =message.text.removeprefix("/bind ")
+    if not msg.isspace():
 
-            match message.reply_to_message.content_type:
+        match message.reply_to_message.content_type:
 
-                case "text":
-                    new_bind = add_new_bind(
-                        chat_id=message.chat.id,
-                        type="text",
-                        phrase=msg,
-                        answer=message.reply_to_message.text)
-                    await message.reply(new_bind)
+            case "text":
+                new_bind = add_new_bind(
+                    chat_id=message.chat.id,
+                    type="text",
+                    phrase=msg,
+                    answer=message.reply_to_message.text)
+                await message.reply(new_bind)
 
-                case "video":
-                    await switch_types(message=message,
-                                       phrase=msg,
-                                       file_id=message.reply_to_message.video.file_id,
-                                       type="video")
-                case "voice":
-                    await switch_types(message=message,
-                                       phrase=msg,
-                                       file_id=message.reply_to_message.voice.file_id,
-                                       type="animation")
+            case "video":
+                await switch_types(message=message,
+                                   phrase=msg,
+                                   file_id=message.reply_to_message.video.file_id,
+                                   type="video")
+            case "voice":
+                await switch_types(message=message,
+                                   phrase=msg,
+                                   file_id=message.reply_to_message.voice.file_id,
+                                   type="animation")
 
-                case "animation":  # 15_728_640
-                    await switch_types(message=message,
-                                       phrase=msg,
-                                       file_id=message.reply_to_message.animation.file_id,
-                                       type="animation")
+            case "animation":  # 15_728_640
+                await switch_types(message=message,
+                                   phrase=msg,
+                                   file_id=message.reply_to_message.animation.file_id,
+                                   type="animation")
 
-                case "photo":
-                    await switch_types(
-                                       message=message,
-                                       phrase=msg,
-                                       file_id=message.reply_to_message.photo[-1].file_id,
-                                       type="photo")
-                case "sticker":
-                    new_bind = add_new_bind(
-                        chat_id=message.chat.id,
-                        type="sticker",
-                        phrase=msg,
-                        answer=message.reply_to_message.sticker.file_id)
-                    await message.reply(new_bind)
+            case "photo":
+                await switch_types(
+                                   message=message,
+                                   phrase=msg,
+                                   file_id=message.reply_to_message.photo[-1].file_id,
+                                   type="photo")
+            case "sticker":
+                await switch_types(
+                    message=message,
+                    phrase=phrase,
+                    file_id=message.reply_to_message.sticker.file_id,
+                    type="sticker"
+                )
 
-                case "video_note":
-                    new_bind = add_new_bind(
-                        chat_id=message.chat.id,
-                        type="video_note",
-                        phrase=msg,
-                        answer=message.reply_to_message.video_note.file_id)
-                    await message.reply(new_bind)
+            case "video_note":
+                await switch_types(
+                                   message=message,
+                                   phrase=msg,
+                                   file_id=message.reply_to_message.video_note.file_id,
+                                   type="video_note")
 
-                case _:
-                    await message.reply("Биндов такого типа пока не завезли)")
+            case _:
+                await message.reply("Биндов такого типа пока не завезли)")
 
 
-        else:
-            await message.reply("Что биндить-то?")
     else:
-        await message.reply('Ваш бинд имеет неверный вид.\n'
-                            'Бинд должен иметь следующий вид: /bind ("ваша фраза")\n'
-                            'т.е. аргументы для команды передаются в скобках и ковычках, с отступом в один пробел от самоый команды.')
+        await message.reply("Что биндить-то?")
 
 
 @dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
-    if message.text[8] == "(" and message.text[-1] == ")":
-        msg = message.text[10:-2:1]
+    msg = message.text.removeprefix("/unbind")
+    if not msg.isspace():
         rem_bind = remove_binds(
-            id=message.chat.id,
-            phrase=msg)
+        id=message.chat.id,
+        phrase=msg)
         await message.reply(rem_bind)
     else:
-        await message.reply('Ваша команда имеет неверный вид.\n'
-                            'Unbind должен иметь следующий вид: /unbind ("ваша фраза")\n'
-                            'т.е. аргументы для команды передаются в скобках и ковычках, с отступом в один пробел от самоый команды.')
+        await message.reply('Ваша команда имеет неверный вид.')
 
 
 @dp.message_handler(content_types=['text'])

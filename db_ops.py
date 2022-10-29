@@ -15,15 +15,37 @@ class Binds(Model):
         database = db
         db_table = "Binds"
 
+
+class Chat_ids(Model):
+    chat_id = TextField(unique=True)
+
+    class Meta:
+        database = db
+        db_table = "Ids"
+
+
 db.connect()
-db.create_tables([Binds])
+db.create_tables([Binds, Chat_ids])
+
+
+def add_chat_id(id):
+    try:
+        Chat_ids(chat_id=id).save()
+    except:
+        pass
+
+def get_ids():
+    ids = []
+    for chat in Chat_ids.select():
+        ids.append(chat.chat_id)
+    return ids
 
 
 def add_new_bind(chat_id, type, phrase, answer):
     try:
         bind = Binds(chat_id=str(chat_id), type=str(type), phrase=str(phrase), answer=str(answer)).save()
         return "Бинд успешно добавлен!"
-    except:
+    except :
         return "Что-то пошло не так. Попробуйте заново или оставьте баг-репорт"
 
 
@@ -59,6 +81,5 @@ def remove_binds(chat_id, phrase):
                     pass
 
             return "Бинд успешно удален"
-    except:
-
-        return "Что-то пошло не так.\nПопробуйте снова или отправьте баг-репорт"
+    except Exception as e:
+        return ("Что-то пошло не так. Вот текст ошибки:\n {e} \nОтправьте ее разработчику командой /report").format(e)

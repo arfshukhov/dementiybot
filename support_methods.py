@@ -21,7 +21,7 @@ def get_wiki_note(request: str):
         pg = wikipedia.page(request)
         return "\n".join([pg.title, "\n", pg.url, "\n", pg.content[0:2000] + "..."])
     except Exception as e:
-        return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт."
+        return f"Что-то пошло не так. Возможно нет статьи с таким названием не сущесвтует. Можете отрпавить баг-репорт, вот текст ошибки: \n {e}."
 
 
 async def switch_types(message, file_id, type: str, phrase):
