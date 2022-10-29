@@ -193,10 +193,10 @@ async def set_bind(message):
 
 @dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
-    msg = message.text.removeprefix("/unbind")
+    msg = message.text.removeprefix("/unbind ")
     if not msg.isspace():
         rem_bind = remove_binds(
-        id=message.chat.id,
+        chat_id=message.chat.id,
         phrase=msg)
         await message.reply(rem_bind)
     else:
