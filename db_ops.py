@@ -63,7 +63,7 @@ def remove_binds(chat_id, phrase):
         for bind in Binds.select().where(Binds.phrase == phrase, Binds.chat_id == id):
             binds.append([bind.type, bind.answer])
         for bind_ in binds:
-            path = os.getcwd()
+            #path = os.getcwd()
             match bind_[0]:
                 case "text":
                     rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
