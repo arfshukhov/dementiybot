@@ -195,7 +195,11 @@ async def set_bind(message):
 
 @dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
-    msg = message.text.removeprefix("/unbind ")
+    try:
+        msg = message.text.removeprefix("/unbind ")
+    except Exception as e:
+        await message.reply(f"Что-то пошло не так, возмжно, неверное форматирование. Вот текст ошибки {e}")
+        pass
     if not msg.isspace():
         rem_bind = remove_binds(
         chat_id=message.chat.id,
