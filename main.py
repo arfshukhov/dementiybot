@@ -173,7 +173,7 @@ async def set_bind(message):
             case "sticker":
                 await switch_types(
                     message=message,
-                    phrase=phrase,
+                    phrase=msg,
                     file_id=message.reply_to_message.sticker.file_id,
                     type="sticker"
                 )
