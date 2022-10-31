@@ -51,18 +51,20 @@ def add_new_bind(chat_id, type, phrase, answer):
 
 async def get_binds(chat_id):
     answers = []
-    for binds in Binds.select().where(Binds.chat_id == int(chat_id)):
+    for binds in Binds.select().where(Binds.chat_id == chat_id):
         answers.append([binds.type, binds.phrase, binds.answer])
     return answers
 
 
 def remove_binds(chat_id, phrase):
     try:
-        id = int(chat_id)
+        id = chat_id
         binds = []
         for bind in Binds.select().where(Binds.phrase == phrase, Binds.chat_id == id):
             binds.append([bind.type, bind.answer])
+        #print(*binds)
         for bind_ in binds:
+
             #path = os.getcwd()
             match bind_[0]:
                 case "text":
@@ -80,8 +82,9 @@ def remove_binds(chat_id, phrase):
                 case "video_note":
                     rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
                 case _:
-                    pass
+                    return "Такого типа нет"
+            #print(bind_)
+        return "Бинд успешно удален"
 
-            return "Бинд успешно удален"
     except Exception as e:
-        return ("Что-то пошло не так. Вот текст ошибки:\n {e} \nОтправьте ее разработчику командой /report").format(e)
+        return f"Что-то пошло не так. Вот текст ошибки:\n {e} \nОтправьте ее разработчику командой /report"

@@ -134,7 +134,7 @@ async def unban(message):
 
 @dp.message_handler(commands=["bind"])
 async def set_bind(message):
-    msg =message.text.removeprefix("/bind ")
+    msg = (message.text.removeprefix("/bind ")).lower()
     if not msg.isspace():
 
         match message.reply_to_message.content_type:
@@ -196,7 +196,7 @@ async def set_bind(message):
 @dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
     try:
-        msg = message.text.removeprefix("/unbind ")
+        msg = (message.text.removeprefix("/unbind ")).lower()
     except Exception as e:
         await message.reply(f"Что-то пошло не так, возмжно, неверное форматирование. Вот текст ошибки {e}")
         pass
