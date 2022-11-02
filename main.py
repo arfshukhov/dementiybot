@@ -211,7 +211,7 @@ async def set_bind(message):
         await message.reply("Что биндить-то?")
 
 
-@dp.message_handler(commands=["unbind"], is_chat_admin=True)
+@dp.message_handler(commands=["unbind"])
 async def remove_bind(message):
     try:
         msg = (message.text.removeprefix("/unbind ")).lower()
@@ -227,7 +227,7 @@ async def remove_bind(message):
         await message.reply('Ваша команда имеет неверный вид.')
 
 
-@dp.message_handler(commands=["unbind_all"])
+@dp.message_handler(commands=["unbind_all"], is_chat_admin=True)
 async def remove_all_binds(message):
     rem_bind = remove_binds(
         chat_id=message.chat.id)
@@ -238,8 +238,11 @@ async def remove_all_binds(message):
 async def view_all_binds(message):
     binds = await get_binds(chat_id=message.chat.id)
     phrases = [i[1] for i in binds]
-    str_phrases = "\n".join(set(sorted(phrases)))
-    await message.reply(str_phrases)
+    if phrases != []:
+        str_phrases = "\n".join(set(sorted(phrases)))
+        await message.reply(str_phrases)
+    else:
+        await message.reply("В вашем чате нет биндов")
 
 
 @dp.message_handler(content_types=['text'])
