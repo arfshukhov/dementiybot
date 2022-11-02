@@ -56,35 +56,16 @@ async def get_binds(chat_id):
     return answers
 
 
-def remove_binds(chat_id, phrase):
+def remove_binds(chat_id, *phrase):
     try:
         id = chat_id
-        binds = []
-        for bind in Binds.select().where(Binds.phrase == phrase, Binds.chat_id == id):
-            binds.append([bind.type, bind.answer])
-        #print(*binds)
-        for bind_ in binds:
+        if phrase:
+            Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
+            return "Бинд успешно удален"
+        else:
+            Binds.delete().where(Binds.chat_id == id).execute()
+            return "Все бинды в вашем чате удалены"
 
-            #path = os.getcwd()
-            match bind_[0]:
-                case "text":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "voice":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "video":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "animation":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "photo":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "sticker":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case "video_note":
-                    rem_binds = Binds.delete().where(Binds.chat_id == id, Binds.phrase == phrase).execute()
-                case _:
-                    return "Такого типа нет"
-            #print(bind_)
-        return "Бинд успешно удален"
 
     except Exception as e:
         return f"Что-то пошло не так. Вот текст ошибки:\n {e} \nОтправьте ее разработчику командой /report"

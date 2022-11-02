@@ -9,6 +9,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType, Message, File
 from db_ops import *
 
+
 from support_methods import *
 
 
@@ -26,14 +27,23 @@ async def send_welcome(message: types.Message):
                         'аналогичный с /bind синтаксис.\n' 
                         'Сейчас доступны следующие типы триггеров: текст, видео, голосовые сообщения, видео, фото, gif,'
                         'стикеры и видеозаписи ("кружки").\n'
+                        '/unbind_all - удаляет все бинды в чате, ЭТО ДЕЙСТВИЕ НЕЛЬЗЯ ОТМЕНИТЬ!'
+                        ' (доступно только для админов)\n'
+                        '/view_all_binds - показывает все бинды в вашем чате\n'
                         '/echo - отправитель сообщения закукарекает.\n'
                         '/dice - бросает кость, через пробел можно указать число бросков, но не более 10.\n'
-                        '/wiki_get название статьи - команда возвращает статью на Википедии. Если существуют'
-                        'только похожие статьи, возвращает их название. Если изчего из, то ошибку\n'
+                        '/wiki_get название статьи - команда возвращает статью на Википедии. Если существуют '
+                        'только похожие статьи, возвращает их название. Если ничего из, то ошибку\n'
                         '/ban и /unban - в ответ на сообщение банит пользователя\n'
                         '/mobilize - мобилизует пользователя\n'
                         '/report - отправить репорт разработчику, будь то жалоба или предложение. после слова /report '
-                        'оставьте текст')
+                        'оставьте текст\n'
+                        'Бот работает некорректно?\n'
+                        '-Бот должен являться администратором\n'
+                        '-Бовым участникам чата должны быть видны ве сообщения\n'
+                        '-Бот должен иметь право писать сообщения в чате.\n'
+                        'Если все эти меры предприняты, но Бот по-прежнему работает некорректно, '
+                        'то составьте баг-репорт, в котором опишите вашу проблему и то, как вы пытались ее решить.')
 
 
 @dp.message_handler(commands=['echo'])
@@ -51,6 +61,14 @@ async def get_db(message):
             await bot.send_message(i, f"#Дневник_разработки\n#dev_blog\n{note}")
     else:
         message.reply_to_message("У вас нет доступа к этой функции")
+
+@dp.message_handler(commands=["demotivator"])
+async def demotivator(message):
+    try:
+        img = message.reply_to_message.photo
+        text = message.text.removeprefix("/demotivator ")
+    except Exception as e:
+        message.reply(e)
 
 
 @dp.message_handler(commands=["mobilize"])
@@ -193,7 +211,7 @@ async def set_bind(message):
         await message.reply("Что биндить-то?")
 
 
-@dp.message_handler(commands=["unbind"])
+@dp.message_handler(commands=["unbind"], is_chat_admin=True)
 async def remove_bind(message):
     try:
         msg = (message.text.removeprefix("/unbind ")).lower()
@@ -202,16 +220,31 @@ async def remove_bind(message):
         pass
     if not msg.isspace():
         rem_bind = remove_binds(
-        chat_id=message.chat.id,
-        phrase=msg)
+        message.chat.id,
+        msg)
         await message.reply(rem_bind)
     else:
         await message.reply('Ваша команда имеет неверный вид.')
 
 
+@dp.message_handler(commands=["unbind_all"])
+async def remove_all_binds(message):
+    rem_bind = remove_binds(
+        chat_id=message.chat.id)
+    await message.reply(rem_bind)
+
+
+@dp.message_handler(commands=["view_all_binds"])
+async def view_all_binds(message):
+    binds = await get_binds(chat_id=message.chat.id)
+    phrases = [i[1] for i in binds]
+    str_phrases = "\n".join(set(sorted(phrases)))
+    await message.reply(str_phrases)
+
+
 @dp.message_handler(content_types=['text'])
 async def filter_messages(message: types.Message):
-    bind = await get_binds(chat_id=int(message.chat.id))
+    bind = await get_binds(chat_id=message.chat.id)
     for elem in bind:
         if elem[1].lower() in message.text.lower():
             match elem[0]:
