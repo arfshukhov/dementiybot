@@ -1,7 +1,7 @@
 import logging
 import wikipedia
 
-
+from demotivator import Demotivator
 
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import ContentType, Message, File
@@ -33,3 +33,8 @@ async def switch_types(message, file_id, type: str, phrase):
         answer=file_id)
     await message.reply(new_bind)
 
+async def make_demotivator(path, text):
+    if "|" in text:
+        elements = text.split("|")
+        Demotivator(path, elements[0], elements[1])
+    else: Demotivator(path, text)

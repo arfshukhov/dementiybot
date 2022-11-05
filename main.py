@@ -64,11 +64,12 @@ async def get_db(message):
 
 @dp.message_handler(commands=["demotivator"])
 async def demotivator(message):
-    try:
-        img = message.reply_to_message.photo
-        text = message.text.removeprefix("/demotivator ")
-    except Exception as e:
-        message.reply(e)
+    path = f"templates/demotivators/{message.reply_to_message.photo[-1].file_id}"
+    await message.reply_to_message.photo[-1].download(path+".jpg")
+    text = message.text.removeprefix("/demotivator ")
+    await make_demotivator(path+".jpg", text)
+    await message.reply_photo(open(path+".jpg", "rb"))
+    os.remove(path+".jpg")
 
 
 @dp.message_handler(commands=["mobilize"])
