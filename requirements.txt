@@ -10,3 +10,4 @@ peewee
 pip
 psycopg2
 pgsql
+Pillow
