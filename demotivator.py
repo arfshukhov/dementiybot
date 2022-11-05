@@ -45,7 +45,7 @@ class Demotivator:
                 if i.isupper(): upper.append(i)
                 else: lower.append(i)
             draw.text((512-(l_font*len(lower)+h_font*len(upper)), self.prepared_picture.size[1]+self.string_offset),
-                                 text, font=ImageFont.truetype("timesnewromanpsmt.ttf", size=size))
+                                 text, font=ImageFont.truetype("fonts/timesnewromanpsmt.ttf", size=size))
             self.string_offset += 2*h_font+offset
         else:
             elements = text.split(" ")
@@ -77,7 +77,7 @@ class Demotivator:
                         lower.append(i)
                 draw.text((512 - (l_font * len(lower) + h_font * len(upper)),
                            self.prepared_picture.size[1] + self.string_offset),
-                          b, font=ImageFont.truetype("arial.ttf", size=size))
+                          b, font=ImageFont.truetype("fonts/timesnewromanpsmt.ttf", size=size))
                 self.string_offset += 1.5* h_font + offset
                 upper = []
                 lower = []
