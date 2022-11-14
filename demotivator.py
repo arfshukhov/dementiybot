@@ -1,5 +1,4 @@
 from PIL import Image, ImageOps, ImageFont, ImageDraw
-import sys
 import os
 
 
