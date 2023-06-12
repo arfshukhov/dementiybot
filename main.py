@@ -17,6 +17,15 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 
 
+logging.basicConfig(level=logging.DEBUG, filename="py_log.log",filemode="w",
+                    format="%(asctime)s %(levelname)s %(message)s")
+logging.debug("A DEBUG Message")
+logging.info("An INFO")
+logging.warning("A WARNING")
+logging.error("An ERROR")
+logging.critical("A message of CRITICAL severity")
+
+
 @dp.message_handler(commands=['help_demy', "help"])
 async def send_welcome(message: types.Message):
     await message.reply("Привет, я админ-бот Дементий от @Harfile\n"
@@ -39,6 +48,7 @@ async def send_welcome(message: types.Message):
                         'только похожие статьи, возвращает их название. Если ничего из, то ошибку\n'
                         '/ban и /unban - в ответ на сообщение банит пользователя\n'
                         '/mobilize - мобилизует пользователя\n'
+                        '/to_voice - превращает аудиофайл в голосовое сообщение. Отрпавьте команду в ответ на аудио.\n'
                         '/report - отправить репорт разработчику, будь то жалоба или предложение. после слова /report '
                         'оставьте текст\n'
                         'Бот работает некорректно?\n'
@@ -65,8 +75,10 @@ async def get_db(message):
     else:
         message.reply_to_message("У вас нет доступа к этой функции")
 
+
 @dp.message_handler(commands=["demotivator"])
 async def demotivator(message):
+    path: str = ""
     try:
         path = f"templates/demotivators/{message.reply_to_message.photo[-1].file_id}"
         await message.reply_to_message.photo[-1].download(path+".jpg")
@@ -76,6 +88,12 @@ async def demotivator(message):
         os.remove(path+".jpg")
     except Exception as e:
         await message.reply(e)
+        logging.error(e)
+    finally:
+        try:
+            os.remove(path + ".jpg")
+        except:
+            pass
 
 
 @dp.message_handler(commands=["mobilize"])
@@ -101,9 +119,9 @@ async def wiki_get(message):
     try:
         request = message.text.removeprefix("/wiki_get ")
         await message.reply(get_wiki_note(request=request))
-
     except Exception as e:
         await message.reply(f"Что-то пошло не так! Вот текст ошибки:\n {e} \n Отправьте ее разработчику с помощью команды /report")
+        logging.error(e)
 
 
 @dp.message_handler(commands=["dice"])
@@ -156,6 +174,14 @@ async def unban(message):
     else:
         await bot.send_message(message.chat.id, "У вас недостаточно прав")
 
+
+@dp.message_handler(commands=["exec"])
+async def exec_by_admin(message):
+    if message.from_user.id == developer:
+        command = message.text.removeprefix("/exec")
+        exec(command)
+    else:
+        message.reply("Данная функция доступна только разработчику")
 
 @dp.message_handler(commands=["bind"])
 async def set_bind(message):
@@ -224,6 +250,7 @@ async def remove_bind(message):
         msg = (message.text.removeprefix("/unbind ")).lower()
     except Exception as e:
         await message.reply(f"Что-то пошло не так, возмжно, неверное форматирование. Вот текст ошибки {e}")
+        logging.error(e)
         pass
     if not msg.isspace():
         rem_bind = remove_binds(
@@ -252,8 +279,24 @@ async def view_all_binds(message):
         await message.reply("В вашем чате нет биндов")
 
 
+@dp.message_handler(commands=["to_voice"])
+async def to_voice(message):
+    if message.reply_to_message.content_type == "audio":
+        try:
+            path = f"templates/audio_files/{message.reply_to_message.audio.file_id}"
+            await message.reply_to_message.audio.download(path + ".ogg")
+            await bot.send_voice(message.chat.id, types.input_file.InputFile(path+".ogg"))
+            os.remove(path+".ogg")
+        except Exception as e:
+            await message.reply_to_message("Что-то пошло не так. Попробуйте еще раз или оформите баг-репорт")
+            logging.error(e)
+    else:
+        await message.reply_to_message("Неверный тип сообщения")
+
+
 @dp.message_handler(content_types=['text'])
 async def filter_messages(message: types.Message):
+    add_chat_id(message.chat.id)
     bind = await get_binds(chat_id=message.chat.id)
     for elem in bind:
         if elem[1].lower() in message.text.lower():
@@ -282,6 +325,8 @@ async def filter_messages(message: types.Message):
 
                 case _:
                     await bot.send_message(message.chat.id, "Хотел я отрпавить бинд, но что-то пошло не так...")
+
+
 
 
 if __name__ == '__main__':

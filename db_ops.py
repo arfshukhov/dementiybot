@@ -2,7 +2,7 @@ from peewee import *
 from dataset import *
 import os
 
-db = PostgresqlDatabase(database=database, host=host, user=user, port=5432, password=password)
+db = SqliteDatabase("database.db")
 
 
 class Binds(Model):
